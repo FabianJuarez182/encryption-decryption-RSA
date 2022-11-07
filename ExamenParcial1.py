@@ -4,31 +4,48 @@
 # Fabián Estuardo Juárez Tello 21440
 # Catedrático: Mario Castillo
 
-diccionario = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+diccionario = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 listaCasteada = list()
+listaLlave = list()
+key = ''
 M = ''
+C = ''
 p = 0
 q = 0
+n = 0
+e = 0
+ro = 0
 
 #Metodo que permite el ingreso de los datos para encriptar el mensaje
 def ingreso_encriptacion():
     global M
-    M = input('Ingrese el mensaje a encriptar: ');
-    p = int(input('Ingrese el valor de p: '))
-    q = int(input('Ingrese el valor de q: '))
-    e = int(input('Ingrese el valor de e: '))
-    n = p*q
-    ro = (p-1)*(q-1)
-    print("Su valor de n es:",n)
-    print("Su valor de ro es:",ro)
+    M = input('Ingrese el mensaje a encriptar: ')
+    global key
+    key = input ('Ingrese la llave publica ejemplo:(e,n) con parentesis y coma:  ')
+    keyreplace = key.replace('(', '')
+    keyreplace = keyreplace.replace(')','')
+    keysplit = keyreplace.split(',')
+    global e
+    e = int(keysplit[0])
+    global n
+    n = int(keysplit[1])
     print('Ya ha ingresado todos los datos a utilizar para encriptar el mensaje')
     print("Empezando a encriptar")
 
 #Metodo que permite el ingreso de los datos para desencriptar el mensaje
 def ingreso_desencriptacion():
-    C = input('Ingrese el mensaje a encriptado: ')
-    n = int(input('Ingrese el valor de n de la llave publica: '))
-    e = int(input('Ingrese el valor de e de la llave publica: '))
+    global C
+    C = input('Ingrese el mensaje a desencriptar: ')
+    global p
+    p = int(input('Ingrese el valor de p: '))
+    global q
+    q = int(input('Ingrese el valor de q: '))
+    global e
+    e = int(input('Ingrese el valor de e: '))
+    global n
+    n = p*q
+    global ro 
+    ro = (p-1)*(q-1)
     print('Ya ha ingresado todos los datos a utilizar para desencriptar el mensaje')
     print("Empezando a desencriptar")
 
@@ -73,14 +90,35 @@ def accion1():
     longCadena = len(M)
     for i in range(longCadena):
         resultado = diccionario.index(M[i])
-        print(resultado)
         if(resultado < 10):
             parseo = "0" + str(resultado)
-            print(parseo)
             listaCasteada.append(parseo)
         else:
+            parseo = str(resultado)
             listaCasteada.append(parseo)
-    print(listaCasteada)
+    numBloques = str(len(diccionario)-1)
+    bandera = False
+    caracteres = 1
+    while bandera == False:
+        if int(numBloques) > n:
+            bandera = True
+            caracteres = caracteres - 1
+        else:
+            caracteres = caracteres + 1
+            numBloques = numBloques + str(len(diccionario))
+    encriptarParte1 = ''
+    encriptarParte2 = ''
+    for i in range(caracteres):
+            encriptarParte1 = encriptarParte1 + listaCasteada[i]
+            encriptarParte2 = encriptarParte2 + listaCasteada[i+2]
+    numfinalbloque1 = int(encriptarParte1)**e % n
+    numfinalbloque2 = int(encriptarParte2)**e % n
+    print ('bloque 1 :',numfinalbloque1)
+    print ('bloque 2 :',numfinalbloque2)
+    print('\nMensaje encriptado: ',numfinalbloque1, "", numfinalbloque2)
+
+
+
 
 
 #Metodo que realizara la Desencriptacion RSA
@@ -88,6 +126,29 @@ def accion2():
     print('\nHas elegido desencriptacion')
     ingreso_desencriptacion()
 
+    for d in range(1,ro):
+        if((e%ro)*(d%ro) % ro==1):
+            D = d
+    Csplit = C.split(' ')
+    Bloque1 = int(Csplit[0])
+    Bloque2 = int(Csplit[1])
+    P1 = Bloque1**D %n
+    P2 = Bloque2**D %n
+
+    if(P1<1000):
+        P1str = '0' + str (P1)
+    else:
+        P1str = str (P1)
+    if(P2<1000):
+        P2str = '0' + str (P2)
+    else:
+        P2str = str (P2)
+    l1 = P1str[0] + P1str[1]
+    l2 = P1str[2] + P1str[3]
+    l3 = P2str[0] + P2str[1]
+    l4 = P2str[2] + P2str[3]
+    MensajeDesencriptado = diccionario[int(l1)]+ diccionario[int(l2)] + diccionario[int(l3)] + diccionario[int(l4)]
+    print('\nMensaje desencriptado: ',MensajeDesencriptado)
 
 
 #Metodo que cerrara el programa si el usuario lo elije
